@@ -45,7 +45,7 @@ const Step3HowMuch = ({ onNext }: { onNext: (message: string) => void }) => {
         How much do you love him? 🥺
       </h1>
       <p className="text-muted-foreground text-lg mb-6">
-        Tell him everything... 💌
+        Tell him in words, numbers, anything... 💌
       </p>
       <textarea
         value={text}

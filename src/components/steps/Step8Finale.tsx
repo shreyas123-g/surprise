@@ -8,7 +8,25 @@ interface Balloon {
   popped: boolean;
   delay: number;
   color: string;
+  speed: number;
 }
+
+const playPopSound = () => {
+  try {
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = ctx.createOscillator();
+    const gain = ctx.createGain();
+    oscillator.connect(gain);
+    gain.connect(ctx.destination);
+    oscillator.type = "sine";
+    oscillator.frequency.setValueAtTime(800, ctx.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.15);
+    gain.gain.setValueAtTime(0.5, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+    oscillator.start(ctx.currentTime);
+    oscillator.stop(ctx.currentTime + 0.2);
+  } catch {}
+};
 
 const Step8Finale = () => {
   const [balloons, setBalloons] = useState<Balloon[]>([]);
@@ -19,28 +37,36 @@ const Step8Finale = () => {
     setShowConfetti(true);
     setTimeout(() => setShowConfetti(false), 100);
 
-    const colors = ["❤️", "💖", "💕", "💗", "💘", "💝", "🩷"];
+    const colors = ["❤️", "💖", "💕", "💗", "💘", "💝", "🩷", "🎈", "❤️", "💖", "💕", "💗", "💘", "💝"];
     setBalloons(
-      Array.from({ length: 12 }, (_, i) => ({
+      Array.from({ length: 14 }, (_, i) => ({
         id: i,
-        x: 5 + (i * 8),
+        x: 3 + (i * 7),
         popped: false,
-        delay: Math.random() * 2,
+        delay: Math.random() * 3,
         color: colors[i % colors.length],
+        speed: 5 + Math.random() * 5,
       }))
     );
   }, []);
 
-  const popBalloon = (id: number, e: React.MouseEvent) => {
+  const popBalloon = (id: number, e: React.MouseEvent | React.TouchEvent) => {
+    playPopSound();
+    
+    const clientX = "touches" in e ? e.touches[0]?.clientX ?? 150 : e.clientX;
+    const clientY = "touches" in e ? e.touches[0]?.clientY ?? 300 : e.clientY;
+    
     setBalloons((prev) =>
       prev.map((b) => (b.id === id ? { ...b, popped: true } : b))
     );
+    
+    const msgId = Date.now() + id;
     setPoppedMessages((prev) => [
       ...prev,
-      { id: Date.now(), x: e.clientX, y: e.clientY },
+      { id: msgId, x: clientX, y: clientY },
     ]);
     setTimeout(() => {
-      setPoppedMessages((prev) => prev.filter((m) => m.id !== Date.now()));
+      setPoppedMessages((prev) => prev.filter((m) => m.id !== msgId));
     }, 2000);
   };
 
@@ -56,13 +82,14 @@ const Step8Finale = () => {
             initial={{ y: "100vh" }}
             animate={{ y: "-20vh" }}
             transition={{
-              duration: 6 + Math.random() * 4,
+              duration: b.speed,
               repeat: Infinity,
               delay: b.delay,
               ease: "linear",
             }}
             onClick={(e) => popBalloon(b.id, e)}
-            className="absolute cursor-pointer text-4xl hover:scale-125 transition-transform z-20"
+            onTouchStart={(e) => popBalloon(b.id, e)}
+            className="absolute cursor-pointer text-4xl md:text-5xl hover:scale-125 transition-transform z-20 select-none"
             style={{ left: `${b.x}%` }}
           >
             {b.color}
@@ -70,8 +97,9 @@ const Step8Finale = () => {
         ) : (
           <motion.div
             key={`pop-${b.id}`}
-            initial={{ scale: 1.5, opacity: 1 }}
+            initial={{ scale: 2, opacity: 1 }}
             animate={{ scale: 0, opacity: 0 }}
+            transition={{ duration: 0.4 }}
             className="absolute text-4xl"
             style={{ left: `${b.x}%`, top: "50%" }}
           >
@@ -84,11 +112,11 @@ const Step8Finale = () => {
       {poppedMessages.map((m) => (
         <motion.div
           key={m.id}
-          initial={{ opacity: 1, y: 0 }}
-          animate={{ opacity: 0, y: -60 }}
+          initial={{ opacity: 1, y: 0, scale: 0.5 }}
+          animate={{ opacity: 0, y: -80, scale: 1.3 }}
           transition={{ duration: 1.5 }}
-          className="fixed z-50 text-romantic text-xl font-bold pointer-events-none"
-          style={{ left: m.x - 40, top: m.y - 20, color: "hsl(340 82% 62%)" }}
+          className="fixed z-50 text-romantic text-2xl font-bold pointer-events-none"
+          style={{ left: m.x - 50, top: m.y - 20, color: "hsl(340 82% 62%)" }}
         >
           Love You ❤️
         </motion.div>
@@ -102,12 +130,12 @@ const Step8Finale = () => {
         className="relative z-10"
       >
         <motion.h1
-          animate={{ scale: [1, 1.05, 1] }}
+          animate={{ scale: [1, 1.08, 1] }}
           transition={{ repeat: Infinity, duration: 2 }}
           className="text-romantic text-6xl md:text-8xl font-bold mb-6"
-          style={{ 
+          style={{
             color: "hsl(340 82% 62%)",
-            textShadow: "0 0 30px hsla(340, 82%, 62%, 0.5), 0 0 60px hsla(340, 82%, 62%, 0.3)"
+            textShadow: "0 0 30px hsla(340, 82%, 62%, 0.5), 0 0 60px hsla(340, 82%, 62%, 0.3), 0 0 90px hsla(340, 82%, 62%, 0.2)"
           }}
         >
           I LOVE YOU ❤️
@@ -120,13 +148,13 @@ const Step8Finale = () => {
         transition={{ delay: 1.5 }}
         className="text-foreground text-lg md:text-xl mt-4 relative z-10"
       >
-        Click the heart balloons! 🎈
+        Tap the heart balloons! 🎈💥
       </motion.p>
 
       {/* Final message */}
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 3 }}
         className="glass-card p-6 md:p-8 mt-10 relative z-10"
       >
