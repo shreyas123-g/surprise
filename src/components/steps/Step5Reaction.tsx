@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 
-const Step5Reaction = ({ onNext }: { onNext: () => void }) => {
+const Step5Reaction = ({ onNext }: { onNext: (choice: string) => void }) => {
   return (
     <div className="glass-card p-8 md:p-10 text-center">
       <motion.div
@@ -20,7 +20,7 @@ const Step5Reaction = ({ onNext }: { onNext: () => void }) => {
         <motion.button
           whileHover={{ scale: 1.08 }}
           whileTap={{ scale: 0.95 }}
-          onClick={onNext}
+          onClick={() => onNext("Loved it 😍")}
           className="btn-heart text-lg px-8 py-4"
         >
           Loved it 😍
@@ -28,7 +28,7 @@ const Step5Reaction = ({ onNext }: { onNext: () => void }) => {
         <motion.button
           whileHover={{ scale: 1.08 }}
           whileTap={{ scale: 0.95 }}
-          onClick={onNext}
+          onClick={() => onNext("Loved it more ❤️")}
           className="btn-heart text-lg px-8 py-4"
           style={{
             background: "linear-gradient(135deg, hsl(0 80% 55%), hsl(340 82% 62%))",

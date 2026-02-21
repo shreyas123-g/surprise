@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 
-const Step1Question = ({ onNext }: { onNext: () => void }) => {
+const Step1Question = ({ onNext }: { onNext: (name: string) => void }) => {
   const [name, setName] = useState("");
 
   const handleSubmit = () => {
     if (name.trim().toLowerCase().includes("shreyas")) {
-      onNext();
+      onNext(name.trim());
     }
   };
 

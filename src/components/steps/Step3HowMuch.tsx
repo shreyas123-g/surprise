@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 
-const Step3HowMuch = ({ onNext }: { onNext: () => void }) => {
+const Step3HowMuch = ({ onNext }: { onNext: (message: string) => void }) => {
   const [text, setText] = useState("");
   const [hearts, setHearts] = useState<{ id: number; x: number; y: number }[]>([]);
 
@@ -57,7 +57,7 @@ const Step3HowMuch = ({ onNext }: { onNext: () => void }) => {
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        onClick={onNext}
+        onClick={() => onNext(text.trim())}
         disabled={text.trim().length === 0}
         className="btn-heart text-lg px-10 py-4 disabled:opacity-50 disabled:cursor-not-allowed"
       >
